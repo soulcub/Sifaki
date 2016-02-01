@@ -2,6 +2,7 @@ package com.me.hello;
 
 import java.net.URL;
 
+import com.me.Application;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

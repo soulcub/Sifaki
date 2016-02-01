@@ -15,8 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @ComponentScan("com.me.configuration")
 @RestController
-public class HelloController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HelloController.class);
+public class Controller {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
 
     @Autowired
     private SessionFactory sessionFactory;
