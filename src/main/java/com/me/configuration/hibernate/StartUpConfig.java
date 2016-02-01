@@ -8,21 +8,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBuilder;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author SStorozhev
  * @since 2/1/2016
  */
 @Configuration
-@EnableTransactionManagement
-@ComponentScan({"com.me.configuration"})
 @PropertySource(value = {"classpath:hibernate.properties"})
 public class StartUpConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(StartUpConfig.class);
@@ -35,6 +31,14 @@ public class StartUpConfig {
     private String username;
     @Value("${jdbc.password}")
     private String password;
+
+    @Bean
+    public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
+        LOGGER.debug("Configuring HibernateTransactionManager using SessionFactory='{}'", sessionFactory);
+        HibernateTransactionManager hibernateTransactionManager = new HibernateTransactionManager();
+        hibernateTransactionManager.setSessionFactory(sessionFactory);
+        return hibernateTransactionManager;
+    }
 
     @Bean
     public SessionFactory sessionFactory() {
@@ -53,13 +57,5 @@ public class StartUpConfig {
         dataSource.setUsername(username);
         dataSource.setPassword(password);
         return dataSource;
-    }
-
-    @Bean
-    public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
-        LOGGER.debug("Configuring HibernateTransactionManager using SessionFactory='{}'", sessionFactory);
-        HibernateTransactionManager hibernateTransactionManager = new HibernateTransactionManager();
-        hibernateTransactionManager.setSessionFactory(sessionFactory);
-        return hibernateTransactionManager;
     }
 }
