@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-com.me.configuration SYSTEM
+        "http://www.hibernate.org/dtd/hibernate-com.me.configuration-3.0.dtd">
+
+<hibernate-com.me.configuration>
+    <session-factory>
+        <property name="hibernate.connection.driver_class">
+            org.postgresql.Driver
+        </property>
+        <property name="hibernate.dialect">
+            org.hibernate.dialect.MySQLDialect
+        </property>
+        <!-- Assume students is the database name -->
+        <property name="hibernate.connection.url">
+            jdbc:postgresql://localhost/event
+        </property>
+        <property name="hibernate.connection.username">
+            test
+        </property>
+        <property name="hibernate.connection.password">
+            test
+        </property>
+    </session-factory>
+</hibernate-com.me.configuration>
