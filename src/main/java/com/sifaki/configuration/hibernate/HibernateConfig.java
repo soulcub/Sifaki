@@ -1,4 +1,4 @@
-package com.me.configuration.hibernate;
+package com.sifaki.configuration.hibernate;
 
 import javax.persistence.EntityManagerFactory;
 

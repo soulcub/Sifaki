@@ -1,8 +1,8 @@
-package com.me.hello;
+package com.sifaki.api;
 
 import java.net.URL;
 
-import com.me.Application;
+import com.sifaki.Application;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

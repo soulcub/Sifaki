@@ -1,7 +1,7 @@
-package com.me.hello;
+package com.sifaki.api;
 
 import com.google.common.base.Optional;
-import com.me.hello.entity.Event;
+import com.sifaki.db.entity.Event;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@ComponentScan("com.me.configuration")
+@ComponentScan("com.sifaki.configuration")
 @RestController
 public class Controller {
 

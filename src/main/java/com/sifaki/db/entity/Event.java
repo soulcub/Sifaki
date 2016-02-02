@@ -1,4 +1,4 @@
-package com.me.hello.entity;
+package com.sifaki.db.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

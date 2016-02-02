@@ -1,4 +1,4 @@
-package com.me.hello;
+package com.sifaki.api;
 
 import org.junit.Before;
 import org.junit.Test;
