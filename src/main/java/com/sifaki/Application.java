@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan("com.sifaki.configuration")
+@ComponentScan
 public class Application {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
