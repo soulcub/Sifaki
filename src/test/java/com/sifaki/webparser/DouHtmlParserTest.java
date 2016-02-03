@@ -12,6 +12,6 @@ public class DouHtmlParserTest {
 
     @Test
     public void testParse() throws IOException {
-        douHtmlParser.parseEvents();
+        douHtmlParser.parseAllEvents();
     }
 }

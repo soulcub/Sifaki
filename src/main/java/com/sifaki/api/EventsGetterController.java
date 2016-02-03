@@ -10,17 +10,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class Controller {
+@RequestMapping("/events")
+public class EventsGetterController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventsGetterController.class);
 
     @Autowired
     private SessionFactory sessionFactory;
 
-    @RequestMapping("/{id}")
+    @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
     public String get(@PathVariable int id) {
         LOGGER.info("Getting Event by id='{}'", id);
         final Session session = sessionFactory.openSession();
@@ -33,7 +35,7 @@ public class Controller {
             return eventToReturn.toString();
         } else {
             LOGGER.debug("No events with id='{}'", id);
-            return "No data";
+            return "No events with id=" + id;
         }
     }
 

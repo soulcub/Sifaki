@@ -19,7 +19,7 @@ public class DouHtmlParser {
     private static final String CALENDAR_URL_ENDING = "/calendar";
     private static final String HREF_ATTRIBUTE = "href";
 
-    public Elements parseEvents() throws IOException {
+    public Elements parseAllEvents() throws IOException {
         Document document = getDocument(DOU_URL + CALENDAR_URL_ENDING);
 
         final String lastPageUrlEnding = getLastPageUrlEnding(document);
