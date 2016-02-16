@@ -30,7 +30,7 @@ public class Event {
     private String imageLink;
     @Column(name = "dateTime")
     private DateTime dateTime;
-    private String where;
+    private String coordinates;
     private Integer cost;
     @Column(name = "costCommentary")
     private String costCommentary;
@@ -47,7 +47,7 @@ public class Event {
         setTitle(builder.title);
         setImageLink(builder.imageLink);
         setDateTime(builder.dateTime);
-        setWhere(builder.where);
+        setCoordinates(builder.coordinates);
         setCost(builder.cost);
         setCostCommentary(builder.costCommentary);
         setDescription(builder.description);
@@ -91,12 +91,12 @@ public class Event {
         this.dateTime = dateTime;
     }
 
-    public String getWhere() {
-        return where;
+    public String getCoordinates() {
+        return coordinates;
     }
 
-    public void setWhere(String where) {
-        this.where = where;
+    public void setCoordinates(String coordinates) {
+        this.coordinates = coordinates;
     }
 
     public Integer getCost() {
@@ -146,7 +146,7 @@ public class Event {
                 .add("title", title)
                 .add("imageLink", imageLink)
                 .add("dateTime", dateTime)
-                .add("where", where)
+                .add("coordinates", coordinates)
                 .add("cost", cost)
                 .add("costCommentary", costCommentary)
                 .add("description", description)
@@ -172,7 +172,7 @@ public class Event {
                 .append(this.title, rhs.title)
                 .append(this.imageLink, rhs.imageLink)
                 .append(this.dateTime, rhs.dateTime)
-                .append(this.where, rhs.where)
+                .append(this.coordinates, rhs.coordinates)
                 .append(this.cost, rhs.cost)
                 .append(this.costCommentary, rhs.costCommentary)
                 .append(this.description, rhs.description)
@@ -188,7 +188,7 @@ public class Event {
                 .append(title)
                 .append(imageLink)
                 .append(dateTime)
-                .append(where)
+                .append(coordinates)
                 .append(cost)
                 .append(costCommentary)
                 .append(description)
@@ -202,7 +202,7 @@ public class Event {
         private String title;
         private String imageLink;
         private DateTime dateTime;
-        private String where;
+        private String coordinates;
         private Integer cost;
         private String costCommentary;
         private String description;
@@ -232,8 +232,8 @@ public class Event {
             return this;
         }
 
-        public Builder where(String val) {
-            where = val;
+        public Builder coordinates(String val) {
+            coordinates = val;
             return this;
         }
 

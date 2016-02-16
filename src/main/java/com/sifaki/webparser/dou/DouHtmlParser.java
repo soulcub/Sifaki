@@ -44,7 +44,7 @@ public class DouHtmlParser {
     private static final String CALENDAR_URL_ENDING = "/calendar";
     private static final String HREF = "href";
     public static final String SRC = "src";
-    public static final String PLACE = "Место";
+    public static final String COORDINATES = "Место";
     private static final String COST = "Стоимость";
     private PriceParser priceParser;
 
@@ -152,7 +152,7 @@ public class DouHtmlParser {
 
         final Elements eventInfo = getEventsInfo(document);
         final String imageLink = getEventImageLink(eventInfo);
-        final String where = parseEventInfoRow(eventInfo, PLACE);
+        final String coordinates = parseEventInfoRow(eventInfo, COORDINATES);
         final String costCommentary = parseEventInfoRow(eventInfo, COST);
         final Price price = parseCost(costCommentary);
 
@@ -161,7 +161,7 @@ public class DouHtmlParser {
                 sourceLink(sourceLink).
                 title(title).
                 imageLink(imageLink).
-                where(where).
+                coordinates(coordinates).
                 costCommentary(costCommentary).
                 cost(price.getPrice()).
                 build();
