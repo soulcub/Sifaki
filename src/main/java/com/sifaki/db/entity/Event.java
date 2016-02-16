@@ -2,12 +2,15 @@ package com.sifaki.db.entity;
 
 import java.util.ArrayList;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.google.common.base.Objects;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import com.google.common.base.MoreObjects;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 
 /**
@@ -17,17 +20,43 @@ import org.joda.time.DateTime;
 @Entity
 @Table(name = "events")
 public class Event {
+
     @Id
+    @GeneratedValue
+    @Column(name = "id")
     private int id;
     private String title;
+    @Column(name = "imageLink")
     private String imageLink;
+    @Column(name = "dateTime")
     private DateTime dateTime;
     private String where;
-    private int cost;
+    private Integer cost;
+    @Column(name = "costCommentary")
+    private String costCommentary;
     private String description;
     private ArrayList<String> tags;
+    @Column(name = "sourceLink")
+    private String sourceLink;
 
     public Event() {
+    }
+
+    private Event(Builder builder) {
+        setId(builder.id);
+        setTitle(builder.title);
+        setImageLink(builder.imageLink);
+        setDateTime(builder.dateTime);
+        setWhere(builder.where);
+        setCost(builder.cost);
+        setCostCommentary(builder.costCommentary);
+        setDescription(builder.description);
+        setTags(builder.tags);
+        setSourceLink(builder.sourceLink);
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     public int getId() {
@@ -70,11 +99,11 @@ public class Event {
         this.where = where;
     }
 
-    public int getCost() {
+    public Integer getCost() {
         return cost;
     }
 
-    public void setCost(int cost) {
+    public void setCost(Integer cost) {
         this.cost = cost;
     }
 
@@ -94,40 +123,148 @@ public class Event {
         this.tags = tags;
     }
 
+    public String getSourceLink() {
+        return sourceLink;
+    }
+
+    public void setSourceLink(String sourceLink) {
+        this.sourceLink = sourceLink;
+    }
+
+    public String getCostCommentary() {
+        return costCommentary;
+    }
+
+    public void setCostCommentary(String costCommentary) {
+        this.costCommentary = costCommentary;
+    }
+
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("id", id)
-                .append("title", title)
-                .append("imageLink", imageLink)
-                .append("dateTime", dateTime)
-                .append("where", where)
-                .append("cost", cost)
-                .append("description", description)
-                .append("tags", tags)
+        return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("title", title)
+                .add("imageLink", imageLink)
+                .add("dateTime", dateTime)
+                .add("where", where)
+                .add("cost", cost)
+                .add("costCommentary", costCommentary)
+                .add("description", description)
+                .add("tags", tags)
+                .add("sourceLink", sourceLink)
                 .toString();
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Event that = (Event) o;
-
-        return Objects.equal(this.id, that.id) &&
-                Objects.equal(this.title, that.title) &&
-                Objects.equal(this.imageLink, that.imageLink) &&
-                Objects.equal(this.dateTime, that.dateTime) &&
-                Objects.equal(this.where, that.where) &&
-                Objects.equal(this.cost, that.cost) &&
-                Objects.equal(this.description, that.description) &&
-                Objects.equal(this.tags, that.tags);
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Event rhs = (Event) obj;
+        return new EqualsBuilder()
+                .append(this.id, rhs.id)
+                .append(this.title, rhs.title)
+                .append(this.imageLink, rhs.imageLink)
+                .append(this.dateTime, rhs.dateTime)
+                .append(this.where, rhs.where)
+                .append(this.cost, rhs.cost)
+                .append(this.costCommentary, rhs.costCommentary)
+                .append(this.description, rhs.description)
+                .append(this.tags, rhs.tags)
+                .append(this.sourceLink, rhs.sourceLink)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, title, imageLink, dateTime, where, cost,
-                description, tags);
+        return new HashCodeBuilder()
+                .append(id)
+                .append(title)
+                .append(imageLink)
+                .append(dateTime)
+                .append(where)
+                .append(cost)
+                .append(costCommentary)
+                .append(description)
+                .append(tags)
+                .append(sourceLink)
+                .toHashCode();
     }
+
+    public static final class Builder {
+        private int id;
+        private String title;
+        private String imageLink;
+        private DateTime dateTime;
+        private String where;
+        private Integer cost;
+        private String costCommentary;
+        private String description;
+        private ArrayList<String> tags;
+        private String sourceLink;
+
+        private Builder() {
+        }
+
+        public Builder id(int val) {
+            id = val;
+            return this;
+        }
+
+        public Builder title(String val) {
+            title = val;
+            return this;
+        }
+
+        public Builder imageLink(String val) {
+            imageLink = val;
+            return this;
+        }
+
+        public Builder dateTime(DateTime val) {
+            dateTime = val;
+            return this;
+        }
+
+        public Builder where(String val) {
+            where = val;
+            return this;
+        }
+
+        public Builder cost(Integer val) {
+            cost = val;
+            return this;
+        }
+
+        public Builder costCommentary(String  val) {
+            costCommentary = val;
+            return this;
+        }
+
+        public Builder description(String val) {
+            description = val;
+            return this;
+        }
+
+        public Builder tags(ArrayList<String> val) {
+            tags = val;
+            return this;
+        }
+
+        public Builder sourceLink(String val) {
+            sourceLink = val;
+            return this;
+        }
+
+        public Event build() {
+            return new Event(this);
+        }
+    }
+
 }

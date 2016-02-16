@@ -6,6 +6,6 @@ package com.sifaki.utils;
  */
 public class StringUtils {
 
-    public static final String REPLACE_ALL_NUMBERS_REGEX = "\\d+";
+    public static final String NUMBER_REGEX = "\\d+";
 
 }

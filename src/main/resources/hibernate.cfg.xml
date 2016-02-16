@@ -4,11 +4,11 @@
     "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
   <session-factory>
-    <property name="connection.url"/>
-    <property name="connection.driver_class"/>
-    <property name="connection.username"/>
-    <property name="connection.password"/>
+    <property testValues="connection.url"/>
+    <property testValues="connection.driver_class"/>
+    <property testValues="connection.username"/>
+    <property testValues="connection.password"/>
     <!-- DB schema will be updated if needed -->
-    <!-- <property name="hbm2ddl.auto">update</property> -->
+    <!-- <property testValues="hbm2ddl.auto">update</property> -->
   </session-factory>
 </hibernate-configuration>

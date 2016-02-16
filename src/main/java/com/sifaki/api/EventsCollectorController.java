@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.List;
 
 import com.sifaki.db.entity.Event;
-import com.sifaki.webparser.DouHtmlParser;
+import com.sifaki.webparser.dou.DouHtmlParser;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +35,11 @@ public class EventsCollectorController {
         LOGGER.info("Starting collection of the events.");
         final List<Event> events = douHtmlParser.parseAllEvents();
 
-//        final Session session = sessionFactory.openSession();
-//        final Transaction transaction = session.beginTransaction();
-//        final Optional<Event> optionalEvent = Optional.fromNullable(session.get(Event.class, 1));
-//        transaction.commit();
-//        if (optionalEvent.isPresent()) {
-//            final Event eventToReturn = optionalEvent.get();
-//            return eventToReturn.toString();
-//        } else {
+        final Session session = sessionFactory.openSession();
+        final Transaction transaction = session.beginTransaction();
+        events.forEach(session::saveOrUpdate);
+        transaction.commit();
         return events.toString();
-//        }
     }
 
 }

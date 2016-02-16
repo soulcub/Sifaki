@@ -1,6 +1,7 @@
 package com.sifaki.configuration.parser;
 
-import com.sifaki.webparser.DouHtmlParser;
+import com.sifaki.webparser.dou.DouHtmlParser;
+import com.sifaki.webparser.prise.PriceParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,8 +13,13 @@ import org.springframework.context.annotation.Configuration;
 public class ParserConfig {
 
     @Bean
-    public DouHtmlParser douHtmlParser() {
-        return new DouHtmlParser();
+    public PriceParser priceParser() {
+        return new PriceParser();
+    }
+
+    @Bean
+    public DouHtmlParser douHtmlParser(PriceParser priceParser) {
+        return new DouHtmlParser(priceParser);
     }
 
 }
