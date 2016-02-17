@@ -3,7 +3,7 @@ package com.sifaki.webparser;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import com.sifaki.webparser.dou.Element;
+import com.sifaki.webparser.dou.HtmlElement;
 import com.sifaki.webparser.dou.HtmlClass;
 
 /**
@@ -12,9 +12,9 @@ import com.sifaki.webparser.dou.HtmlClass;
  */
 public class JsoupQueryBuilder {
 
-    private Element baseElement;
+    private HtmlElement baseHtmlElement;
     private ArrayList<JsoupQueryBuilder> childElements = new ArrayList<>();
-    private ArrayList<Element> attributes = new ArrayList<>();
+    private ArrayList<HtmlElement> attributes = new ArrayList<>();
     private ArrayList<HtmlClass> htmlClasses = new ArrayList<>();
     private String containedText;
 
@@ -22,8 +22,8 @@ public class JsoupQueryBuilder {
         return new JsoupQueryBuilder();
     }
 
-    public JsoupQueryBuilder all(Element element) {
-        baseElement = element;
+    public JsoupQueryBuilder all(HtmlElement htmlElement) {
+        baseHtmlElement = htmlElement;
         return this;
     }
 
@@ -32,7 +32,7 @@ public class JsoupQueryBuilder {
         return this;
     }
 
-    public JsoupQueryBuilder with(Element... attributes) {
+    public JsoupQueryBuilder with(HtmlElement... attributes) {
         Collections.addAll(this.attributes, attributes);
         return this;
     }
@@ -42,9 +42,9 @@ public class JsoupQueryBuilder {
         return this;
     }
 
-    public JsoupQueryBuilder have(Element... childElements) {
-        for (Element childElement : childElements) {
-            this.childElements.add(select().all(childElement));
+    public JsoupQueryBuilder have(HtmlElement... childHtmlElements) {
+        for (HtmlElement childHtmlElement : childHtmlElements) {
+            this.childElements.add(select().all(childHtmlElement));
         }
         return this;
     }
@@ -58,7 +58,7 @@ public class JsoupQueryBuilder {
         StringBuilder builder = new StringBuilder();
 
         if (!attributes.isEmpty()) {
-            for (Element attribute : attributes) {
+            for (HtmlElement attribute : attributes) {
                 builder.append('[').append(attribute).append("],");
             }
             builder.deleteCharAt(builder.lastIndexOf(","));
@@ -81,7 +81,7 @@ public class JsoupQueryBuilder {
             }
         }
 
-        return baseElement.toString() + builder;
+        return baseHtmlElement.toString() + builder;
     }
 
 }

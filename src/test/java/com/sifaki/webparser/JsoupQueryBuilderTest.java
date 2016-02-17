@@ -1,6 +1,6 @@
 package com.sifaki.webparser;
 
-import com.sifaki.webparser.dou.Element;
+import com.sifaki.webparser.dou.HtmlElement;
 import com.sifaki.webparser.dou.HtmlClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,10 +24,10 @@ public class JsoupQueryBuilderTest {
     public void testSelectAllElements() {
         final String result = buildSelect(
                 select().
-                        all(Element.A)
+                        all(HtmlElement.A)
         );
 
-        final Element expected = Element.A;
+        final HtmlElement expected = HtmlElement.A;
         assertEquals(expected.toString(), result);
     }
 
@@ -35,11 +35,11 @@ public class JsoupQueryBuilderTest {
     public void testSelectAllElementsWhichContainsText() {
         final String result = buildSelect(
                 select().
-                        all(Element.A).
+                        all(HtmlElement.A).
                         withText(TEXT)
         );
 
-        final String expected = Element.A + ":contains(" + TEXT + ")";
+        final String expected = HtmlElement.A + ":contains(" + TEXT + ")";
         assertEquals(expected, result);
     }
 
@@ -47,11 +47,11 @@ public class JsoupQueryBuilderTest {
     public void testSelectAllElementsWithAttributes() {
         final String result = buildSelect(
                 select().
-                        all(Element.A).
-                        with(Element.HREF)
+                        all(HtmlElement.A).
+                        with(HtmlElement.HREF)
         );
 
-        final String expected = Element.A + "[" + Element.HREF + "]";
+        final String expected = HtmlElement.A + "[" + HtmlElement.HREF + "]";
         assertEquals(expected, result);
     }
 
@@ -59,12 +59,12 @@ public class JsoupQueryBuilderTest {
     public void testSelectAllElementsWithClassesQuery() {
         final String result = buildSelect(
                 select().
-                        all(Element.A).
+                        all(HtmlElement.A).
                         with(HtmlClass.DATE, HtmlClass.EVENT).
                         with(HtmlClass.PAGE_HEAD)
         );
 
-        final String expected = Element.A +
+        final String expected = HtmlElement.A +
                 "." + HtmlClass.DATE +
                 ",." + HtmlClass.EVENT +
                 ",." + HtmlClass.PAGE_HEAD;
@@ -75,15 +75,15 @@ public class JsoupQueryBuilderTest {
     public void testSelectAllElementsWhichHaveElementsQuery() {
         final String result = buildSelect(
                 select().
-                        all(Element.A).
-                        have(Element.DIV, Element.HREF).
-                        have(Element.CLASS)
+                        all(HtmlElement.A).
+                        have(HtmlElement.DIV, HtmlElement.HREF).
+                        have(HtmlElement.CLASS)
         );
 
-        final String expected = Element.A +
-                ":has(" + Element.DIV + ")" +
-                ":has(" + Element.HREF + ")" +
-                ":has(" + Element.CLASS + ")";
+        final String expected = HtmlElement.A +
+                ":has(" + HtmlElement.DIV + ")" +
+                ":has(" + HtmlElement.HREF + ")" +
+                ":has(" + HtmlElement.CLASS + ")";
         assertEquals(expected, result);
     }
 
@@ -91,15 +91,15 @@ public class JsoupQueryBuilderTest {
     public void testSelectAllElementsWhichHaveElementsWhichContainsTextQuery() {
         final String result = buildSelect(
                 select().
-                        all(Element.A).
+                        all(HtmlElement.A).
                         have(
                                 select().
-                                all(Element.DIV).
+                                all(HtmlElement.DIV).
                                         withText(TEXT)
                         )
         );
 
-        final String expected = Element.A + ":has(" + Element.DIV + ":contains(" + TEXT + "))";
+        final String expected = HtmlElement.A + ":has(" + HtmlElement.DIV + ":contains(" + TEXT + "))";
         assertEquals(expected, result);
     }
 

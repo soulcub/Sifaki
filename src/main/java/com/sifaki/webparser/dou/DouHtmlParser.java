@@ -19,13 +19,14 @@ import org.joda.time.LocalDateTime;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import static com.sifaki.utils.StringUtils.NUMBER_REGEX;
 import static com.sifaki.webparser.JsoupQueryBuilder.select;
-import static com.sifaki.webparser.dou.Element.A;
-import static com.sifaki.webparser.dou.Element.DIV;
-import static com.sifaki.webparser.dou.Element.SPAN;
+import static com.sifaki.webparser.dou.HtmlElement.A;
+import static com.sifaki.webparser.dou.HtmlElement.DIV;
+import static com.sifaki.webparser.dou.HtmlElement.SPAN;
 import static com.sifaki.webparser.dou.HtmlClass.DATE;
 import static com.sifaki.webparser.dou.HtmlClass.EVENT;
 import static com.sifaki.webparser.dou.HtmlClass.EVENT_INFO;
@@ -90,7 +91,7 @@ public class DouHtmlParser {
                                 with(PAGE).
                                 build()).
                 last().
-                select(select().all(A).with(Element.HREF).build());
+                select(select().all(A).with(HtmlElement.HREF).build());
     }
 
     private List<Map.Entry<LocalDateTime, String>> parseEventLinkWithDatePairs(Document document) {
@@ -102,7 +103,7 @@ public class DouHtmlParser {
 
         LocalDateTime dateTime = null;
         List<Map.Entry<LocalDateTime, String>> eventLinks = new ArrayList<>();
-        for (org.jsoup.nodes.Element eventBlock : eventBlocks) {
+        for (Element eventBlock : eventBlocks) {
             final String className = eventBlock.className();
             if (className.equals(HtmlClass.INFO.toString())) {
                 final Elements infoBlocks = eventBlock.select(
@@ -110,7 +111,7 @@ public class DouHtmlParser {
                                 all(A).
                                 with(DATE).
                                 build());
-                final org.jsoup.nodes.Element firstInfoBlock = infoBlocks.first();
+                final Element firstInfoBlock = infoBlocks.first();
                 final String url = firstInfoBlock.absUrl(HREF);
                 final String date = getLastUrlBlock(url);
                 dateTime = LocalDateTime.parse(date);
@@ -121,8 +122,8 @@ public class DouHtmlParser {
                                 all(DIV).
                                 with(HtmlClass.TITLE).
                                 build());
-                final org.jsoup.nodes.Element eventLink = eventTitles.
-                        select(select().all(A).with(Element.HREF).build()).
+                final Element eventLink = eventTitles.
+                        select(select().all(A).with(HtmlElement.HREF).build()).
                         first();
                 final String eventUrl = eventLink.absUrl(HREF);
                 final AbstractMap.SimpleEntry<LocalDateTime, String> entry = new AbstractMap.SimpleEntry<>(dateTime, eventUrl);
@@ -171,7 +172,7 @@ public class DouHtmlParser {
     }
 
     private String parseEventInfoRow(Elements eventInfo, String containedText) {
-        final org.jsoup.nodes.Element eventInfoRowWithPlace = eventInfo.select(
+        final Element eventInfoRowWithPlace = eventInfo.select(
                 select().
                         all(DIV).
                         with(HtmlClass.EVENT_INFO_ROW).
@@ -195,7 +196,7 @@ public class DouHtmlParser {
     private String getEventImageLink(Elements eventInfo) {
         return eventInfo.select(
                 select().
-                        all(Element.IMG).
+                        all(HtmlElement.IMG).
                         build()).
                 first().
                 absUrl(SRC);
