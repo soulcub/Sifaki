@@ -15,7 +15,7 @@ import com.sifaki.webparser.prise.CurrencyType;
 import com.sifaki.webparser.prise.PriceParser;
 import com.sifaki.webparser.prise.entity.Price;
 import com.sun.istack.internal.Nullable;
-import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,13 +39,14 @@ import static com.sifaki.webparser.dou.HtmlClass.PAGE_HEAD;
  */
 public class DouHtmlParser {
 
-    private static final String DOU_URL = "http://dou.ua";
-    private static final int PAGE_NUMBER_START_WITH = 2;
-    private static final String CALENDAR_URL_ENDING = "/calendar";
-    private static final String HREF = "href";
+    public static final String DOU_URL = "http://dou.ua";
+    public static final int PAGE_NUMBER_START_WITH = 2;
+    public static final String CALENDAR_URL_ENDING = "/calendar";
+    public static final String HREF = "href";
     public static final String SRC = "src";
     public static final String COORDINATES = "Место";
-    private static final String COST = "Стоимость";
+    public static final String COST = "Стоимость";
+
     private PriceParser priceParser;
 
     public DouHtmlParser(PriceParser priceParser) {
@@ -56,14 +57,14 @@ public class DouHtmlParser {
         final Document firstPageDocument = createJsoapDocument(DOU_URL + CALENDAR_URL_ENDING);
 
         final Integer lastPageNumber = parseLastPageNumber(firstPageDocument);
-        final List<Map.Entry<DateTime, String>> eventLinkWithDatePairs = parseEventLinkWithDatePairs(firstPageDocument);
+        final List<Map.Entry<LocalDateTime, String>> eventLinkWithDatePairs = parseEventLinkWithDatePairs(firstPageDocument);
         for (Integer nextPageNumber = PAGE_NUMBER_START_WITH; nextPageNumber <= lastPageNumber; nextPageNumber++) {
             final String nextPageUrl = getNextPageUrl(parseLastPageUrlEnding(firstPageDocument), nextPageNumber);
             eventLinkWithDatePairs.addAll(parseEventLinkWithDatePairs(createJsoapDocument(nextPageUrl)));
         }
 
         final List<Event> events = new ArrayList<>();
-        for (Map.Entry<DateTime, String> eventLinkWithDatePair : eventLinkWithDatePairs) {
+        for (Map.Entry<LocalDateTime, String> eventLinkWithDatePair : eventLinkWithDatePairs) {
             final String eventLink = eventLinkWithDatePair.getValue();
             final Document eventPageDocument = createJsoapDocument(eventLink);
             events.add(getAndParseEvent(eventPageDocument, eventLinkWithDatePair));
@@ -73,19 +74,15 @@ public class DouHtmlParser {
     }
 
     private Integer parseLastPageNumber(Document document) {
-        final String lastPageNumberString = document.
-                select(
-                        select().
-                                all(SPAN).
-                                with(PAGE).
-                                build()).
-                last().
-                select(select().all(A).with(Element.HREF).build()).
-                text();
+        final String lastPageNumberString = getLastPageElements(document).text();
         return Integer.valueOf(lastPageNumberString);
     }
 
     private String parseLastPageUrlEnding(Document document) {
+        return getLastPageElements(document).attr(HREF);
+    }
+
+    private Elements getLastPageElements(Document document) {
         return document.
                 select(
                         select().
@@ -93,19 +90,18 @@ public class DouHtmlParser {
                                 with(PAGE).
                                 build()).
                 last().
-                select(select().all(A).with(Element.HREF).build()).
-                attr(HREF);
+                select(select().all(A).with(Element.HREF).build());
     }
 
-    private List<Map.Entry<DateTime, String>> parseEventLinkWithDatePairs(Document document) {
+    private List<Map.Entry<LocalDateTime, String>> parseEventLinkWithDatePairs(Document document) {
         final Elements eventBlocks = document.select(
                 select().
                         all(DIV).
                         with(INFO, EVENT).
                         build());
 
-        DateTime dateTime = null;
-        List<Map.Entry<DateTime, String>> eventLinks = new ArrayList<>();
+        LocalDateTime dateTime = null;
+        List<Map.Entry<LocalDateTime, String>> eventLinks = new ArrayList<>();
         for (org.jsoup.nodes.Element eventBlock : eventBlocks) {
             final String className = eventBlock.className();
             if (className.equals(HtmlClass.INFO.toString())) {
@@ -117,7 +113,7 @@ public class DouHtmlParser {
                 final org.jsoup.nodes.Element firstInfoBlock = infoBlocks.first();
                 final String url = firstInfoBlock.absUrl(HREF);
                 final String date = getLastUrlBlock(url);
-                dateTime = DateTime.parse(date);
+                dateTime = LocalDateTime.parse(date);
             } else if (className.equals(HtmlClass.EVENT.toString())) {
                 Preconditions.checkNotNull(dateTime, "Date can't be null on this step. Check out html source.");
                 final Elements eventTitles = eventBlock.select(
@@ -129,7 +125,7 @@ public class DouHtmlParser {
                         select(select().all(A).with(Element.HREF).build()).
                         first();
                 final String eventUrl = eventLink.absUrl(HREF);
-                final AbstractMap.SimpleEntry<DateTime, String> entry = new AbstractMap.SimpleEntry<>(dateTime, eventUrl);
+                final AbstractMap.SimpleEntry<LocalDateTime, String> entry = new AbstractMap.SimpleEntry<>(dateTime, eventUrl);
                 eventLinks.add(entry);
             }
         }
@@ -145,8 +141,8 @@ public class DouHtmlParser {
                         splitToList(url));
     }
 
-    private Event getAndParseEvent(Document document, Map.Entry<DateTime, String> eventLinkWithDatePair) {
-        final DateTime eventDate = eventLinkWithDatePair.getKey();
+    private Event getAndParseEvent(Document document, Map.Entry<LocalDateTime, String> eventLinkWithDatePair) {
+        final LocalDateTime eventDate = eventLinkWithDatePair.getKey();
         final String sourceLink = eventLinkWithDatePair.getValue();
         final String title = getTitle(document);
 
@@ -164,6 +160,7 @@ public class DouHtmlParser {
                 coordinates(coordinates).
                 costCommentary(costCommentary).
                 cost(price.getPrice()).
+                currencyType(price.getCurrencyType()).
                 build();
     }
 
@@ -227,12 +224,8 @@ public class DouHtmlParser {
     }
 
     Document createJsoapDocument(String url) throws IOException {
-        Connection connection = getConnection(url);
+        Connection connection = Jsoup.connect(url);
         return connection.get();
-    }
-
-    Connection getConnection(String url) {
-        return Jsoup.connect(url);
     }
 
 }

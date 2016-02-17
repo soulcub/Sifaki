@@ -1,17 +1,21 @@
 package com.sifaki.db.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.google.common.base.MoreObjects;
+import com.sifaki.webparser.prise.CurrencyType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDateTime;
 
 /**
  * @author SStorozhev
@@ -19,25 +23,31 @@ import org.joda.time.DateTime;
  */
 @Entity
 @Table(name = "events")
-public class Event {
+public class Event implements Serializable {
+
+    private static final long serialVersionUID = 6002807323968359900L;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    private int id;
+    private Integer id;
     private String title;
-    @Column(name = "imageLink")
+    @Column(name = "image_link")
     private String imageLink;
-    @Column(name = "dateTime")
-    private DateTime dateTime;
+    @Column(name = "date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentLocalDateTime")
+    private LocalDateTime dateTime;
     private String coordinates;
     private Integer cost;
-    @Column(name = "costCommentary")
+    @Column(name = "cost_commentary")
     private String costCommentary;
     private String description;
     private ArrayList<String> tags;
-    @Column(name = "sourceLink")
+    @Id
+    @Column(name = "source_link")
     private String sourceLink;
+    @Column(name = "currency_type")
+    private CurrencyType currencyType;
 
     public Event() {
     }
@@ -53,17 +63,18 @@ public class Event {
         setDescription(builder.description);
         setTags(builder.tags);
         setSourceLink(builder.sourceLink);
+        setCurrencyType(builder.currencyType);
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -83,11 +94,11 @@ public class Event {
         this.imageLink = imageLink;
     }
 
-    public DateTime getDateTime() {
+    public LocalDateTime getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(DateTime dateTime) {
+    public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
 
@@ -137,6 +148,14 @@ public class Event {
 
     public void setCostCommentary(String costCommentary) {
         this.costCommentary = costCommentary;
+    }
+
+    public CurrencyType getCurrencyType() {
+        return currencyType;
+    }
+
+    public void setCurrencyType(CurrencyType currencyType) {
+        this.currencyType = currencyType;
     }
 
     @Override
@@ -198,21 +217,22 @@ public class Event {
     }
 
     public static final class Builder {
-        private int id;
+        private Integer id;
         private String title;
         private String imageLink;
-        private DateTime dateTime;
+        private LocalDateTime dateTime;
         private String coordinates;
         private Integer cost;
         private String costCommentary;
         private String description;
         private ArrayList<String> tags;
         private String sourceLink;
+        private CurrencyType currencyType;
 
         private Builder() {
         }
 
-        public Builder id(int val) {
+        public Builder id(Integer val) {
             id = val;
             return this;
         }
@@ -227,7 +247,7 @@ public class Event {
             return this;
         }
 
-        public Builder dateTime(DateTime val) {
+        public Builder dateTime(LocalDateTime val) {
             dateTime = val;
             return this;
         }
@@ -242,7 +262,7 @@ public class Event {
             return this;
         }
 
-        public Builder costCommentary(String  val) {
+        public Builder costCommentary(String val) {
             costCommentary = val;
             return this;
         }
@@ -259,6 +279,11 @@ public class Event {
 
         public Builder sourceLink(String val) {
             sourceLink = val;
+            return this;
+        }
+
+        public Builder currencyType(CurrencyType val) {
+            currencyType = val;
             return this;
         }
 

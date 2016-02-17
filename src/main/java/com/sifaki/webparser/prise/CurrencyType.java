@@ -6,9 +6,10 @@ package com.sifaki.webparser.prise;
  */
 public enum CurrencyType implements NamesContainer {
 
-    UAH("uah", "грн", "гр"),
+    FREE,
     USD("$", "usd", "дол"),
-    FREE;
+    EUR("eur", "євро", "евро"),
+    UAH("uah", "грн", "гр");
 
     private String[] names;
 

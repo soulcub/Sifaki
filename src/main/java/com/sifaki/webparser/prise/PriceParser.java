@@ -10,6 +10,7 @@ import com.sifaki.utils.StringUtils;
 import com.sifaki.webparser.prise.entity.Price;
 
 import static com.sifaki.webparser.prise.NamesContainer.getMapFromEnum;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
 /**
  * @author SStorozhev
@@ -69,16 +70,6 @@ public class PriceParser {
         return currencyType;
     }
 
-    private Integer parseAndGetFirstNumber(String priceString) {
-        Pattern pattern = Pattern.compile(StringUtils.NUMBER_REGEX);
-        final Matcher matcher = pattern.matcher(priceString);
-        if (matcher.find()) {
-            return Integer.parseInt(matcher.group());
-        } else {
-            return null;
-        }
-    }
-
     private List<Integer> parseNumbersInString(String priceString) {
         Pattern pattern = Pattern.compile(StringUtils.NUMBER_REGEX);
         final Matcher matcher = pattern.matcher(priceString);
@@ -95,47 +86,11 @@ public class PriceParser {
         for (Map.Entry<T, List<String>> currency : namesContainers.entrySet()) {
             final List<String> names = currency.getValue();
             for (String name : names) {
-                if (stringToParse.contains(name)) {
+                if (containsIgnoreCase(stringToParse, name)) {
                     return currency.getKey();
                 }
             }
         }
-        return null;
-    }
-
-//    private CurrencyType findCostType(List<String> words) {
-//        final ListIterator<String> wordsListIterator = words.listIterator();
-//        while (wordsListIterator.hasNext()) {
-//            final String word = wordsListIterator.next();
-//            for (CurrencyType currencyType : CurrencyType.values()) {
-//                final String[] tokensAfterSplitting = searchAndSplitByFoundNameable(word, currencyType);
-//                if (tokensAfterSplitting != null) {
-//                    if (tokensAfterSplitting.length == 0) {
-//                        return currencyType;
-//                    } else {
-//                        for (String token : tokensAfterSplitting) {
-//                            Pattern pattern = Pattern.compile("\\d+");
-//                            final Matcher matcher = pattern.matcher(token);
-//                            if (matcher.find()) {
-//                                final String number = matcher.group(0);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return CurrencyType.FREE;
-//    }
-
-    /**
-     * @param word          to parse
-     * @param nameableClass to find in the {@code word}
-     * @return {@code null} if no {@link NamesContainer} element was found and array of
-     * {@link String}s which are left after splitting of the {@code word} by the {@link NamesContainer}.
-     * Respectively if there was nothing except currency in the {@code word}, array will be empty.
-     */
-    private String[] searchAndSplitByFoundNameable(String word, Class<? extends NamesContainer> nameableClass) {
-
         return null;
     }
 

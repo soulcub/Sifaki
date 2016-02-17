@@ -51,6 +51,7 @@ public class PriceParserTest {
         final Integer price = 4100;
         final CurrencyType currencyType = currencyTypes.getValue();
         final String stringToParse = String.format("%d %s.", price, currencyTypes.getKey());
+
         final Price result = priceParser.parse(stringToParse);
 
         assertEquals(price, result.getPrice());
@@ -64,9 +65,24 @@ public class PriceParserTest {
         final int price = 4100;
         final CurrencyType currencyType = currencyTypes.getValue();
         final String stringToParse = String.format("%d платежа по %d %s.", multiplier, price, currencyTypes.getKey());
+
         final Price result = priceParser.parse(stringToParse);
 
-        final Integer expected = multiplier * 4100;
+        final Integer expected = multiplier * price;
+        assertEquals(expected, result.getPrice());
+        assertEquals(currencyType, result.getCurrencyType());
+    }
+
+    @Parameters(method = "currencyTypeParameters")
+    @Test
+    public void testParsePriceInUpperCase(Map.Entry<String, CurrencyType> currencyTypes) {
+        final int price = 100;
+        final CurrencyType currencyType = currencyTypes.getValue();
+        final String stringToParse = String.format("%d %s.", price, currencyTypes.getKey().toUpperCase());
+
+        final Price result = priceParser.parse(stringToParse);
+
+        final Integer expected = price;
         assertEquals(expected, result.getPrice());
         assertEquals(currencyType, result.getCurrencyType());
     }
@@ -108,10 +124,10 @@ public class PriceParserTest {
         Integer expected = 0;
         switch (priceOperation) {
             case MULTIPLIER:
-                expected = 10 * 24;
+                expected = price1 * price2;
                 break;
             case RANGE:
-                expected = (10 + 24) / 2;
+                expected = (price1 + price2) / 2;
                 break;
         }
         assertEquals(expected, result.getPrice());
