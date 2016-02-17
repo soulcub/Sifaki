@@ -54,24 +54,39 @@ public class DouHtmlParser {
         this.priceParser = priceParser;
     }
 
+    /**
+     * Parses all events using pages from {@value DOU_URL}{@value CALENDAR_URL_ENDING} page.
+     *
+     * @return {@link List} of parsed {@link Event}s.
+     * @throws IOException Jsoap {@link Document} couldn't have been created.
+     */
     public List<Event> parseAllEvents() throws IOException {
         final Document firstPageDocument = createJsoapDocument(DOU_URL + CALENDAR_URL_ENDING);
 
-        final Integer lastPageNumber = parseLastPageNumber(firstPageDocument);
+        final List<Map.Entry<LocalDateTime, String>> eventLinkWithDatePairs = parseEventLinkDatePairs(firstPageDocument);
+
+        return parseEvents(eventLinkWithDatePairs);
+    }
+
+    private List<Event> parseEvents(List<Map.Entry<LocalDateTime, String>> eventLinkDatePairs) throws IOException {
+        final List<Event> events = new ArrayList<>();
+        for (Map.Entry<LocalDateTime, String> eventLinkDatePair : eventLinkDatePairs) {
+            final String eventLink = eventLinkDatePair.getValue();
+            final Document eventPageDocument = createJsoapDocument(eventLink);
+            events.add(getAndParseEvent(eventPageDocument, eventLinkDatePair));
+        }
+        return events;
+    }
+
+    private List<Map.Entry<LocalDateTime, String>> parseEventLinkDatePairs(Document firstPageDocument) throws IOException {
         final List<Map.Entry<LocalDateTime, String>> eventLinkWithDatePairs = parseEventLinkWithDatePairs(firstPageDocument);
+
+        final Integer lastPageNumber = parseLastPageNumber(firstPageDocument);
         for (Integer nextPageNumber = PAGE_NUMBER_START_WITH; nextPageNumber <= lastPageNumber; nextPageNumber++) {
             final String nextPageUrl = getNextPageUrl(parseLastPageUrlEnding(firstPageDocument), nextPageNumber);
             eventLinkWithDatePairs.addAll(parseEventLinkWithDatePairs(createJsoapDocument(nextPageUrl)));
         }
-
-        final List<Event> events = new ArrayList<>();
-        for (Map.Entry<LocalDateTime, String> eventLinkWithDatePair : eventLinkWithDatePairs) {
-            final String eventLink = eventLinkWithDatePair.getValue();
-            final Document eventPageDocument = createJsoapDocument(eventLink);
-            events.add(getAndParseEvent(eventPageDocument, eventLinkWithDatePair));
-        }
-
-        return events;
+        return eventLinkWithDatePairs;
     }
 
     private Integer parseLastPageNumber(Document document) {
