@@ -11,7 +11,8 @@ public enum HtmlElement {
     HREF("href"),
     A("a"),
     IMG("img"),
-    DIV("div");
+    DIV("div"),
+    ARTICLE("article");
 
     private String name;
 

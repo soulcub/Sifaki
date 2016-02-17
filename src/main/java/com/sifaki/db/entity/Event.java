@@ -1,7 +1,9 @@
 package com.sifaki.db.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -42,7 +44,7 @@ public class Event implements Serializable {
     @Column(name = "cost_commentary")
     private String costCommentary;
     private String description;
-    private ArrayList<String> tags;
+    private String tags;
     @Id
     @Column(name = "source_link")
     private String sourceLink;
@@ -126,12 +128,23 @@ public class Event implements Serializable {
         this.description = description;
     }
 
-    public ArrayList<String> getTags() {
-        return tags;
+    public List<String> getTags() { //Bad solution. TODO: Try to find the better one to directly persist csv.
+        return Arrays.asList(tags.split(","));
     }
 
-    public void setTags(ArrayList<String> tags) {
-        this.tags = tags;
+    public void setTags(List<String> tags) { //Bad solution. TODO: Try to find the better one to directly persist csv.
+        if (tags == null) {
+            return;
+        }
+        StringBuilder result = new StringBuilder();
+        final Iterator<String> iterator = tags.iterator();
+        while (iterator.hasNext()) {
+            result.append(iterator.next());
+            if (iterator.hasNext()) {
+                result.append(",");
+            }
+        }
+        this.tags = result.toString();
     }
 
     public String getSourceLink() {
@@ -225,7 +238,7 @@ public class Event implements Serializable {
         private Integer cost;
         private String costCommentary;
         private String description;
-        private ArrayList<String> tags;
+        private List<String> tags;
         private String sourceLink;
         private CurrencyType currencyType;
 
@@ -272,7 +285,7 @@ public class Event implements Serializable {
             return this;
         }
 
-        public Builder tags(ArrayList<String> val) {
+        public Builder tags(List<String> val) {
             tags = val;
             return this;
         }

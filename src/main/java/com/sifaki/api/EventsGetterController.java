@@ -24,8 +24,6 @@ public class EventsGetterController {
 
     @Autowired
     private SessionFactory sessionFactory;
-    @Autowired
-    private Gson gson;
 
     @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
     public String get(@PathVariable int id) {
@@ -33,13 +31,13 @@ public class EventsGetterController {
         final Session session = sessionFactory.openSession();
         final Transaction transaction = session.beginTransaction();
         final List list = session.createQuery("from " + Event.class.getName() + " E where E.id = " + id).list();
-        final Event event = (Event) list.iterator().next();
+        final Event event = (Event) (list.isEmpty() ? null : list.iterator().next());
         final Optional<Event> optionalEvent = Optional.fromNullable(event);
         transaction.commit();
         if (optionalEvent.isPresent()) {
             final Event eventToReturn = optionalEvent.get();
             LOGGER.debug("Returning Event='{}'", eventToReturn);
-            return gson.toJson(eventToReturn);
+            return new Gson().toJson(eventToReturn);
         } else {
             LOGGER.debug("No events with id='{}'", id);
             return "No events with id=" + id;
@@ -55,7 +53,7 @@ public class EventsGetterController {
         transaction.commit();
         if (!list.isEmpty()) {
             LOGGER.debug("Returning all Events='{}'", list);
-            return gson.toJson(list);
+            return new Gson().toJson(list);
         } else {
             LOGGER.debug("No events were found");
             return "No events were found";

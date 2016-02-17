@@ -5,16 +5,19 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.sifaki.db.entity.Event;
+import com.sifaki.webparser.JsoupQueryBuilder;
 import com.sifaki.webparser.prise.CurrencyType;
 import com.sifaki.webparser.prise.PriceParser;
 import com.sifaki.webparser.prise.entity.Price;
-import com.sun.istack.internal.Nullable;
 import org.joda.time.LocalDateTime;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -24,15 +27,15 @@ import org.jsoup.select.Elements;
 
 import static com.sifaki.utils.StringUtils.NUMBER_REGEX;
 import static com.sifaki.webparser.JsoupQueryBuilder.select;
-import static com.sifaki.webparser.dou.HtmlElement.A;
-import static com.sifaki.webparser.dou.HtmlElement.DIV;
-import static com.sifaki.webparser.dou.HtmlElement.SPAN;
 import static com.sifaki.webparser.dou.HtmlClass.DATE;
 import static com.sifaki.webparser.dou.HtmlClass.EVENT;
 import static com.sifaki.webparser.dou.HtmlClass.EVENT_INFO;
 import static com.sifaki.webparser.dou.HtmlClass.INFO;
 import static com.sifaki.webparser.dou.HtmlClass.PAGE;
 import static com.sifaki.webparser.dou.HtmlClass.PAGE_HEAD;
+import static com.sifaki.webparser.dou.HtmlElement.A;
+import static com.sifaki.webparser.dou.HtmlElement.DIV;
+import static com.sifaki.webparser.dou.HtmlElement.SPAN;
 
 /**
  * @author SStorozhev
@@ -167,17 +170,38 @@ public class DouHtmlParser {
         final String coordinates = parseEventInfoRow(eventInfo, COORDINATES);
         final String costCommentary = parseEventInfoRow(eventInfo, COST);
         final Price price = parseCost(costCommentary);
+        final String description = parseDescription(document);
+        final ArrayList<String> tags = parseTags(document);
 
         return Event.newBuilder().
-                dateTime(eventDate).
-                sourceLink(sourceLink).
                 title(title).
                 imageLink(imageLink).
+                dateTime(eventDate).
                 coordinates(coordinates).
-                costCommentary(costCommentary).
                 cost(price.getPrice()).
+                costCommentary(costCommentary).
+                description(description).
+                tags(tags).
+                sourceLink(sourceLink).
                 currencyType(price.getCurrencyType()).
                 build();
+    }
+
+    private ArrayList<String> parseTags(Document document) {
+        final Elements tagElements = document.select(
+                JsoupQueryBuilder.select().
+                        all(HtmlElement.DIV).
+                        with(HtmlClass.B_POST_TAGS).
+                        build()).
+                select(JsoupQueryBuilder.
+                        select().
+                        all(HtmlElement.A).
+                        build());
+        return tagElements.stream().map(Element::outerHtml).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private String parseDescription(Document document) {
+        return document.select(JsoupQueryBuilder.select().all(HtmlElement.ARTICLE).with(HtmlClass.B_TYPO).build()).html();
     }
 
     @Nullable

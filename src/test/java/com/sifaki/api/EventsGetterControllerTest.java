@@ -1,6 +1,11 @@
 package com.sifaki.api;
 
+import java.util.Collections;
+import java.util.List;
+
+import com.google.gson.Gson;
 import com.sifaki.db.entity.Event;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -11,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -32,8 +38,6 @@ public class EventsGetterControllerTest {
 
     private static final int ID = 666;
 
-    private MockMvc mvc;
-
     @Mock
     private SessionFactory sessionFactory;
     @Mock
@@ -41,9 +45,17 @@ public class EventsGetterControllerTest {
     @Mock
     private Transaction transaction;
     @Mock
-    private Event event;
+    private Query query;
     @InjectMocks
     private EventsGetterController eventsGetterController;
+
+    private MockMvc mvc;
+    private Event event = Event.newBuilder().id(ID).build();
+
+    @Bean
+    public Gson gson() {
+        return new Gson();
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -55,7 +67,10 @@ public class EventsGetterControllerTest {
 
     @Test
     public void testGetRegularEvent() throws Exception {
-        doReturn(event).when(session).get(Event.class, ID);
+        final List<Event> events = Collections.singletonList(event);
+        doReturn(query).when(session).createQuery("from " + Event.class.getName() + " E where E.id = " + ID);
+        doReturn(events).when(query).list();
+
         mvc.perform(
                 MockMvcRequestBuilders.
                         get("/events/get/{id}", ID).
@@ -63,13 +78,15 @@ public class EventsGetterControllerTest {
                 andExpect(
                         status().isOk()).
                 andExpect(
-                        content().string(event.toString()));
+                        content().string(new Gson().toJson(event)));
 
         verify(transaction).commit();
     }
 
     @Test
     public void testGetNullEvent() throws Exception {
+        doReturn(query).when(session).createQuery("from " + Event.class.getName() + " E where E.id = " + ID);
+        doReturn(Collections.EMPTY_LIST).when(query).list();
         mvc.perform(
                 MockMvcRequestBuilders.
                         get("/events/get/{id}", ID).

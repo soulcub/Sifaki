@@ -4,8 +4,10 @@ import java.io.IOException;
 
 import com.sifaki.webparser.dou.DouHtmlParser;
 import com.sifaki.webparser.prise.PriceParser;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -19,8 +21,10 @@ public class DouHtmlParserTest {
     @Mock
     private PriceParser priceParser;
 
-    private DouHtmlParser douHtmlParser = new DouHtmlParser(priceParser);
+    @InjectMocks
+    private DouHtmlParser douHtmlParser;
 
+    @Ignore
     @Test
     public void testParse() throws IOException {
         douHtmlParser.parseAllEvents();
