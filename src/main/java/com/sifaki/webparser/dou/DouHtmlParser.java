@@ -7,23 +7,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.sifaki.db.entity.Event;
-import com.sifaki.webparser.JsoupQueryBuilder;
 import com.sifaki.webparser.prise.CurrencyType;
 import com.sifaki.webparser.prise.PriceParser;
 import com.sifaki.webparser.prise.entity.Price;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.sifaki.utils.StringUtils.NUMBER_REGEX;
 import static com.sifaki.webparser.JsoupQueryBuilder.select;
@@ -43,6 +43,7 @@ import static com.sifaki.webparser.dou.HtmlElement.SPAN;
  */
 public class DouHtmlParser {
 
+    public static Logger logger = LoggerFactory.getLogger(DouHtmlParser.class);
     public static final String DOU_URL = "http://dou.ua";
     public static final int PAGE_NUMBER_START_WITH = 2;
     public static final String CALENDAR_URL_ENDING = "/calendar";
@@ -103,43 +104,43 @@ public class DouHtmlParser {
 
     private Elements getLastPageElements(Document document) {
         return document.
-                select(
-                        select().
-                                all(SPAN).
-                                with(PAGE).
-                                build()).
+                select(select().
+                        all(SPAN).
+                        with(PAGE).
+                        build()).
                 last().
-                select(select().all(A).with(HtmlElement.HREF).build());
+                select(select().
+                        all(A).
+                        with(HtmlElement.HREF).
+                        build());
     }
 
     private List<Map.Entry<LocalDateTime, String>> parseEventLinkWithDatePairs(Document document) {
-        final Elements eventBlocks = document.select(
-                select().
-                        all(DIV).
-                        with(INFO, EVENT).
-                        build());
+        logger.debug("Event link parsing has been started for {}.", document.baseUri());
+        final Elements eventBlocks = document.select(select().
+                all(DIV).
+                with(INFO, EVENT).
+                build());
 
         LocalDateTime dateTime = null;
         List<Map.Entry<LocalDateTime, String>> eventLinks = new ArrayList<>();
         for (Element eventBlock : eventBlocks) {
             final String className = eventBlock.className();
-            if (className.equals(HtmlClass.INFO.toString())) {
-                final Elements infoBlocks = eventBlock.select(
-                        select().
-                                all(A).
-                                with(DATE).
-                                build());
+            if (StringUtils.equals(className, HtmlClass.INFO.toString())) {
+                final Elements infoBlocks = eventBlock.select(select().
+                        all(A).
+                        with(DATE).
+                        build());
                 final Element firstInfoBlock = infoBlocks.first();
                 final String url = firstInfoBlock.absUrl(HREF);
                 final String date = getLastUrlBlock(url);
                 dateTime = LocalDateTime.parse(date);
-            } else if (className.equals(HtmlClass.EVENT.toString())) {
+            } else if (StringUtils.equals(className, HtmlClass.EVENT.toString())) {
                 Preconditions.checkNotNull(dateTime, "Date can't be null on this step. Check out html source.");
-                final Elements eventTitles = eventBlock.select(
-                        select().
-                                all(DIV).
-                                with(HtmlClass.TITLE).
-                                build());
+                final Elements eventTitles = eventBlock.select(select().
+                        all(DIV).
+                        with(HtmlClass.TITLE).
+                        build());
                 final Element eventLink = eventTitles.
                         select(select().all(A).with(HtmlElement.HREF).build()).
                         first();
@@ -153,11 +154,10 @@ public class DouHtmlParser {
     }
 
     public String getLastUrlBlock(String url) {
-        return Iterables.getLast(
-                Splitter.
-                        on('/').
-                        omitEmptyStrings().
-                        splitToList(url));
+        return Iterables.getLast(Splitter.
+                on('/').
+                omitEmptyStrings().
+                splitToList(url));
     }
 
     private Event getAndParseEvent(Document document, Map.Entry<LocalDateTime, String> eventLinkWithDatePair) {
@@ -189,22 +189,20 @@ public class DouHtmlParser {
 
     private ArrayList<String> parseTags(Document document) {
         final Elements tagElements = document.select(
-                JsoupQueryBuilder.select().
+                select().
                         all(HtmlElement.DIV).
                         with(HtmlClass.B_POST_TAGS).
-                        build()).
-                select(JsoupQueryBuilder.
-                        select().
+                        build()).select(
+                select().
                         all(HtmlElement.A).
                         build());
         return tagElements.stream().map(Element::outerHtml).collect(Collectors.toCollection(ArrayList::new));
     }
 
     private String parseDescription(Document document) {
-        return document.select(JsoupQueryBuilder.select().all(HtmlElement.ARTICLE).with(HtmlClass.B_TYPO).build()).html();
+        return document.select(select().all(HtmlElement.ARTICLE).with(HtmlClass.B_TYPO).build()).html();
     }
 
-    @Nullable
     private Price parseCost(String costCommentary) {
         final Price defaultPrice = new Price(0, CurrencyType.FREE);
         return Optional.of(priceParser.parse(costCommentary)).or(defaultPrice);
@@ -215,10 +213,9 @@ public class DouHtmlParser {
                 select().
                         all(DIV).
                         with(HtmlClass.EVENT_INFO_ROW).
-                        have(
-                                select().
-                                        all(DIV).
-                                        withText(containedText)).
+                        have(select().
+                                all(DIV).
+                                withText(containedText)).
                         build()).
                 first();
         if (eventInfoRowWithPlace != null) {
