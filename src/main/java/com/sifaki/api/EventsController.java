@@ -1,8 +1,9 @@
 package com.sifaki.api;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
-import com.google.common.base.Optional;
 import com.google.gson.Gson;
 import com.sifaki.db.entity.Event;
 import org.hibernate.Session;
@@ -11,16 +12,18 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/events")
-public class EventsGetterController {
+public class EventsController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventsGetterController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventsController.class);
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -32,8 +35,9 @@ public class EventsGetterController {
         final Transaction transaction = session.beginTransaction();
         final List list = session.createQuery("from " + Event.class.getName() + " E where E.id = " + id).list();
         final Event event = (Event) (list.isEmpty() ? null : list.iterator().next());
-        final Optional<Event> optionalEvent = Optional.fromNullable(event);
+        final Optional<Event> optionalEvent = Optional.ofNullable(event);
         transaction.commit();
+        session.close();
         if (optionalEvent.isPresent()) {
             final Event eventToReturn = optionalEvent.get();
             LOGGER.debug("Returning Event='{}'", eventToReturn);
@@ -51,6 +55,7 @@ public class EventsGetterController {
         final Transaction transaction = session.beginTransaction();
         final List list = session.createQuery("from " + Event.class.getName()).list();
         transaction.commit();
+        session.close();
         if (!list.isEmpty()) {
             LOGGER.debug("Returning all Events='{}'", list);
             return new Gson().toJson(list);
@@ -60,4 +65,14 @@ public class EventsGetterController {
         }
     }
 
+    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String createEvent(@RequestBody Event event) {
+        final Session session = sessionFactory.openSession();
+        final Transaction transaction = session.beginTransaction();
+        final Serializable save = session.save(event);
+        transaction.commit();
+        session.close();
+
+        return new Gson().toJson(save);
+    }
 }

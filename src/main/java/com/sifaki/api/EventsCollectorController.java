@@ -39,6 +39,7 @@ public class EventsCollectorController {
         final Transaction transaction = session.beginTransaction();
         events.forEach(session::saveOrUpdate);
         transaction.commit();
+        session.close();
         return events.toString();
     }
 

@@ -9,7 +9,9 @@ import com.sifaki.webparser.prise.entity.Price;
 import javafx.util.Pair;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import static junitparams.JUnitParamsRunner.$;
@@ -134,4 +136,14 @@ public class PriceParserTest {
         assertEquals(currencyType, result.getCurrencyType());
     }
 
+    @Rule
+    public ExpectedException expectException = ExpectedException.none();
+
+    @Test
+    public void testName() {
+        expectException.expect(RuntimeException.class);
+        expectException.expectMessage("blah");
+
+        throw new RuntimeException("blah");
+    }
 }

@@ -43,14 +43,14 @@ import static com.sifaki.webparser.dou.HtmlElement.SPAN;
  */
 public class DouHtmlParser {
 
-    public static Logger logger = LoggerFactory.getLogger(DouHtmlParser.class);
-    public static final String DOU_URL = "http://dou.ua";
-    public static final int PAGE_NUMBER_START_WITH = 2;
-    public static final String CALENDAR_URL_ENDING = "/calendar";
-    public static final String HREF = "href";
-    public static final String SRC = "src";
-    public static final String COORDINATES = "Место";
-    public static final String COST = "Стоимость";
+    private static Logger logger = LoggerFactory.getLogger(DouHtmlParser.class);
+    private static final String DOU_URL = "http://dou.ua";
+    private static final int PAGE_NUMBER_START_WITH = 2;
+    private static final String CALENDAR_URL_ENDING = "/calendar";
+    private static final String HREF = "href";
+    private static final String SRC = "src";
+    private static final String COORDINATES = "Место";
+    private static final String COST = "Стоимость";
 
     private PriceParser priceParser;
 
@@ -260,7 +260,7 @@ public class DouHtmlParser {
         return DOU_URL + nextPageEnding;
     }
 
-    Document createJsoapDocument(String url) throws IOException {
+    private Document createJsoapDocument(String url) throws IOException {
         Connection connection = Jsoup.connect(url);
         return connection.get();
     }
