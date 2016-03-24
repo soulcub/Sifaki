@@ -40,6 +40,7 @@ public class Event implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentLocalDateTime")
     private LocalDateTime dateTime;
     private String coordinates;
+    private String city;
     private Integer cost;
     @Column(name = "cost_commentary")
     private String costCommentary;
@@ -60,6 +61,7 @@ public class Event implements Serializable {
         setImageLink(builder.imageLink);
         setDateTime(builder.dateTime);
         setCoordinates(builder.coordinates);
+        setCity(builder.city);
         setCost(builder.cost);
         setCostCommentary(builder.costCommentary);
         setDescription(builder.description);
@@ -110,6 +112,14 @@ public class Event implements Serializable {
 
     public void setCoordinates(String coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public Integer getCost() {
@@ -179,6 +189,7 @@ public class Event implements Serializable {
                 .add("imageLink", imageLink)
                 .add("dateTime", dateTime)
                 .add("coordinates", coordinates)
+                .add("city", city)
                 .add("cost", cost)
                 .add("costCommentary", costCommentary)
                 .add("description", description)
@@ -205,6 +216,7 @@ public class Event implements Serializable {
                 .append(this.imageLink, rhs.imageLink)
                 .append(this.dateTime, rhs.dateTime)
                 .append(this.coordinates, rhs.coordinates)
+                .append(this.city, rhs.city)
                 .append(this.cost, rhs.cost)
                 .append(this.costCommentary, rhs.costCommentary)
                 .append(this.description, rhs.description)
@@ -221,6 +233,7 @@ public class Event implements Serializable {
                 .append(imageLink)
                 .append(dateTime)
                 .append(coordinates)
+                .append(city)
                 .append(cost)
                 .append(costCommentary)
                 .append(description)
@@ -235,6 +248,7 @@ public class Event implements Serializable {
         private String imageLink;
         private LocalDateTime dateTime;
         private String coordinates;
+        private String city;
         private Integer cost;
         private String costCommentary;
         private String description;
@@ -267,6 +281,11 @@ public class Event implements Serializable {
 
         public Builder coordinates(String val) {
             coordinates = val;
+            return this;
+        }
+
+        public Builder city(String val) {
+            city = val;
             return this;
         }
 

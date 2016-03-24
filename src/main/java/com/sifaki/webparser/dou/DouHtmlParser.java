@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.sifaki.db.entity.Event;
+import com.sifaki.webparser.geo.vk.CityVkParser;
 import com.sifaki.webparser.prise.CurrencyType;
 import com.sifaki.webparser.prise.PriceParser;
 import com.sifaki.webparser.prise.entity.Price;
@@ -53,9 +54,11 @@ public class DouHtmlParser {
     private static final String COST = "Стоимость";
 
     private PriceParser priceParser;
+    private CityVkParser cityVkParser;
 
-    public DouHtmlParser(PriceParser priceParser) {
+    public DouHtmlParser(PriceParser priceParser, CityVkParser cityVkParser) {
         this.priceParser = priceParser;
+        this.cityVkParser = cityVkParser;
     }
 
     /**
@@ -160,7 +163,7 @@ public class DouHtmlParser {
                 splitToList(url));
     }
 
-    private Event getAndParseEvent(Document document, Map.Entry<LocalDateTime, String> eventLinkWithDatePair) {
+    private Event getAndParseEvent(Document document, Map.Entry<LocalDateTime, String> eventLinkWithDatePair) throws IOException {
         final LocalDateTime eventDate = eventLinkWithDatePair.getKey();
         final String sourceLink = eventLinkWithDatePair.getValue();
         final String title = getTitle(document);
@@ -168,6 +171,7 @@ public class DouHtmlParser {
         final Elements eventInfo = getEventsInfo(document);
         final String imageLink = getEventImageLink(eventInfo);
         final String coordinates = parseEventInfoRow(eventInfo, COORDINATES);
+        final String city = parseCity(coordinates);
         final String costCommentary = parseEventInfoRow(eventInfo, COST);
         final Price price = parseCost(costCommentary);
         final String description = parseDescription(document);
@@ -178,6 +182,7 @@ public class DouHtmlParser {
                 imageLink(imageLink).
                 dateTime(eventDate).
                 coordinates(coordinates).
+                city(city).
                 cost(price.getPrice()).
                 costCommentary(costCommentary).
                 description(description).
@@ -185,6 +190,10 @@ public class DouHtmlParser {
                 sourceLink(sourceLink).
                 currencyType(price.getCurrencyType()).
                 build();
+    }
+
+    private String parseCity(String coordinates) throws IOException {
+        return cityVkParser.parse(coordinates);
     }
 
     private ArrayList<String> parseTags(Document document) {
