@@ -5,13 +5,13 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.sifaki.db.entity.Event;
+import com.sifaki.db.entity.builders.EventBuilder;
 import com.sifaki.webparser.geo.vk.CityVkParser;
 import com.sifaki.webparser.prise.CurrencyType;
 import com.sifaki.webparser.prise.PriceParser;
@@ -175,20 +175,20 @@ public class DouHtmlParser {
         final String costCommentary = parseEventInfoRow(eventInfo, COST);
         final Price price = parseCost(costCommentary);
         final String description = parseDescription(document);
-        final ArrayList<String> tags = parseTags(document);
+        final String tags = parseTags(document);
 
-        return Event.newBuilder().
-                title(title).
-                imageLink(imageLink).
-                dateTime(eventDate).
-                coordinates(coordinates).
-                city(city).
-                cost(price.getPrice()).
-                costCommentary(costCommentary).
-                description(description).
-                tags(tags).
-                sourceLink(sourceLink).
-                currencyType(price.getCurrencyType()).
+        return EventBuilder.anEvent().
+                withTitle(title).
+                withImageLink(imageLink).
+                withDateTime(eventDate).
+                withCoordinates(coordinates).
+                withCity(city).
+                withCost(price.getPrice()).
+                withCostCommentary(costCommentary).
+                withDescription(description).
+                withTags(tags).
+                withSourceLink(sourceLink).
+                withCurrencyType(price.getCurrencyType()).
                 build();
     }
 
@@ -196,7 +196,7 @@ public class DouHtmlParser {
         return cityVkParser.parse(coordinates);
     }
 
-    private ArrayList<String> parseTags(Document document) {
+    private String parseTags(Document document) {
         final Elements tagElements = document.select(
                 select().
                         all(HtmlElement.DIV).
@@ -205,7 +205,7 @@ public class DouHtmlParser {
                 select().
                         all(HtmlElement.A).
                         build());
-        return tagElements.stream().map(Element::outerHtml).collect(Collectors.toCollection(ArrayList::new));
+        return tagElements.toString();
     }
 
     private String parseDescription(Document document) {

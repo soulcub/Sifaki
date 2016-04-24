@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sifaki.db.entity.Event;
+import com.sifaki.db.entity.EventCategory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -28,28 +30,51 @@ public class EventsController {
     @Autowired
     private SessionFactory sessionFactory;
 
-    @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
-    public String get(@PathVariable int id) {
-        LOGGER.info("Getting Event by id='{}'", id);
-        final Session session = sessionFactory.openSession();
-        final Transaction transaction = session.beginTransaction();
-        final List list = session.createQuery("from " + Event.class.getName() + " E where E.id = " + id).list();
-        final Event event = (Event) (list.isEmpty() ? null : list.iterator().next());
-        final Optional<Event> optionalEvent = Optional.ofNullable(event);
-        transaction.commit();
-        session.close();
-        if (optionalEvent.isPresent()) {
-            final Event eventToReturn = optionalEvent.get();
-            LOGGER.debug("Returning Event='{}'", eventToReturn);
-            return new Gson().toJson(eventToReturn);
-        } else {
-            LOGGER.debug("No events with id='{}'", id);
-            return "No events with id=" + id;
+    @RequestMapping(value = "/getById/{id}", method = RequestMethod.GET)
+    public String getById(@PathVariable int id) throws JsonProcessingException {
+        try(Session session = sessionFactory.openSession()) {
+            LOGGER.info("Getting Event by id='{}'", id);
+            final Transaction transaction = session.beginTransaction();
+            final List list = session.createQuery("from " + Event.class.getName() + " E where E.id = " + id).list();
+            final Event event = (Event) (list.isEmpty() ? null : list.iterator().next());
+            final Optional<Event> optionalEvent = Optional.ofNullable(event);
+            transaction.commit();
+            if (optionalEvent.isPresent()) {
+                final Event eventToReturn = optionalEvent.get();
+                LOGGER.debug("Returning Event='{}'", eventToReturn);
+                return new ObjectMapper().writeValueAsString(eventToReturn);
+            } else {
+                LOGGER.debug("No events with id='{}'", id);
+                return "No events with id=" + id;
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error occurred", e);
+            return new ObjectMapper().writeValueAsString("Unexpected error");
+        }
+    }
+
+    @RequestMapping(value = "/getByCategory/{category}", method = RequestMethod.GET)
+    public String getByCategory(@PathVariable int category) throws JsonProcessingException {
+        try(Session session = sessionFactory.openSession()) {
+            LOGGER.info("Getting Event by category='{}'", category);
+            final Transaction transaction = session.beginTransaction();
+            final List list = session.createQuery("from " + Event.class.getName() + " E where E.category = " + category).list();
+            transaction.commit();
+            if (!list.isEmpty()) {
+                LOGGER.debug("Returning Events='{}'", list);
+                return new ObjectMapper().writeValueAsString(list);
+            } else {
+                LOGGER.debug("No events with category='{}'", category);
+                return "No events with category=" + category;
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error occurred", e);
+            return new ObjectMapper().writeValueAsString("Unexpected error");
         }
     }
 
     @RequestMapping(value = "/get", method = RequestMethod.GET)
-    public String getAll() {
+    public String getAllEvents() throws JsonProcessingException {
         LOGGER.info("Getting all Events");
         final Session session = sessionFactory.openSession();
         final Transaction transaction = session.beginTransaction();
@@ -58,7 +83,7 @@ public class EventsController {
         session.close();
         if (!list.isEmpty()) {
             LOGGER.debug("Returning all Events='{}'", list);
-            return new Gson().toJson(list);
+            return new ObjectMapper().writeValueAsString(list);
         } else {
             LOGGER.debug("No events were found");
             return "No events were found";
@@ -66,13 +91,33 @@ public class EventsController {
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String createEvent(@RequestBody Event event) {
+    public String createEvent(@RequestBody Event event) throws JsonProcessingException {
         final Session session = sessionFactory.openSession();
         final Transaction transaction = session.beginTransaction();
         final Serializable save = session.save(event);
         transaction.commit();
         session.close();
 
-        return new Gson().toJson(save);
+        return new ObjectMapper().writeValueAsString(save);
     }
+
+    @RequestMapping(value = "/categories/get", method = RequestMethod.GET)
+    public String getAllEventCategories() throws JsonProcessingException {
+        final Session session = sessionFactory.openSession();
+        final Transaction transaction = session.beginTransaction();
+
+        final List list = session.createQuery("from " + EventCategory.class.getName()).list();
+
+        transaction.commit();
+        session.close();
+
+        if (!list.isEmpty()) {
+            LOGGER.debug("Returning all EventCategories='{}'", list);
+            return new ObjectMapper().writeValueAsString(list);
+        } else {
+            LOGGER.debug("No event categories were found");
+            return "No event categories were found";
+        }
+    }
+
 }

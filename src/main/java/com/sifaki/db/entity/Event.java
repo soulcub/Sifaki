@@ -1,9 +1,6 @@
 package com.sifaki.db.entity;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,10 +9,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.joda.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.joda.ser.LocalDateTimeSerializer;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.sifaki.webparser.prise.CurrencyType;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDateTime;
 
@@ -38,6 +38,8 @@ public class Event implements Serializable {
     private String imageLink;
     @Column(name = "date_time")
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentLocalDateTime")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime dateTime;
     private String coordinates;
     private String city;
@@ -51,28 +53,7 @@ public class Event implements Serializable {
     private String sourceLink;
     @Column(name = "currency_type")
     private CurrencyType currencyType;
-
-    public Event() {
-    }
-
-    private Event(Builder builder) {
-        setId(builder.id);
-        setTitle(builder.title);
-        setImageLink(builder.imageLink);
-        setDateTime(builder.dateTime);
-        setCoordinates(builder.coordinates);
-        setCity(builder.city);
-        setCost(builder.cost);
-        setCostCommentary(builder.costCommentary);
-        setDescription(builder.description);
-        setTags(builder.tags);
-        setSourceLink(builder.sourceLink);
-        setCurrencyType(builder.currencyType);
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
-    }
+    private Integer category;
 
     public Integer getId() {
         return id;
@@ -138,23 +119,12 @@ public class Event implements Serializable {
         this.description = description;
     }
 
-    public List<String> getTags() { //Bad solution. TODO: Try to find the better one to directly persist csv.
-        return Arrays.asList(tags.split(","));
+    public String getTags() {
+        return tags;
     }
 
-    public void setTags(List<String> tags) { //Bad solution. TODO: Try to find the better one to directly persist csv.
-        if (tags == null) {
-            return;
-        }
-        StringBuilder result = new StringBuilder();
-        final Iterator<String> iterator = tags.iterator();
-        while (iterator.hasNext()) {
-            result.append(iterator.next());
-            if (iterator.hasNext()) {
-                result.append(",");
-            }
-        }
-        this.tags = result.toString();
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 
     public String getSourceLink() {
@@ -181,9 +151,48 @@ public class Event implements Serializable {
         this.currencyType = currencyType;
     }
 
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Event that = (Event) o;
+
+        return Objects.equal(this.serialVersionUID, that.serialVersionUID) &&
+                Objects.equal(this.id, that.id) &&
+                Objects.equal(this.title, that.title) &&
+                Objects.equal(this.imageLink, that.imageLink) &&
+                Objects.equal(this.dateTime, that.dateTime) &&
+                Objects.equal(this.coordinates, that.coordinates) &&
+                Objects.equal(this.city, that.city) &&
+                Objects.equal(this.cost, that.cost) &&
+                Objects.equal(this.costCommentary, that.costCommentary) &&
+                Objects.equal(this.description, that.description) &&
+                Objects.equal(this.tags, that.tags) &&
+                Objects.equal(this.sourceLink, that.sourceLink) &&
+                Objects.equal(this.currencyType, that.currencyType) &&
+                Objects.equal(this.category, that.category);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(serialVersionUID, id, title, imageLink, dateTime, coordinates,
+                city, cost, costCommentary, description, tags,
+                sourceLink, currencyType, category);
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                .add("serialVersionUID", serialVersionUID)
                 .add("id", id)
                 .add("title", title)
                 .add("imageLink", imageLink)
@@ -195,133 +204,8 @@ public class Event implements Serializable {
                 .add("description", description)
                 .add("tags", tags)
                 .add("sourceLink", sourceLink)
+                .add("currencyType", currencyType)
+                .add("category", category)
                 .toString();
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        Event rhs = (Event) obj;
-        return new EqualsBuilder()
-                .append(this.id, rhs.id)
-                .append(this.title, rhs.title)
-                .append(this.imageLink, rhs.imageLink)
-                .append(this.dateTime, rhs.dateTime)
-                .append(this.coordinates, rhs.coordinates)
-                .append(this.city, rhs.city)
-                .append(this.cost, rhs.cost)
-                .append(this.costCommentary, rhs.costCommentary)
-                .append(this.description, rhs.description)
-                .append(this.tags, rhs.tags)
-                .append(this.sourceLink, rhs.sourceLink)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-                .append(id)
-                .append(title)
-                .append(imageLink)
-                .append(dateTime)
-                .append(coordinates)
-                .append(city)
-                .append(cost)
-                .append(costCommentary)
-                .append(description)
-                .append(tags)
-                .append(sourceLink)
-                .toHashCode();
-    }
-
-    public static final class Builder {
-        private Integer id;
-        private String title;
-        private String imageLink;
-        private LocalDateTime dateTime;
-        private String coordinates;
-        private String city;
-        private Integer cost;
-        private String costCommentary;
-        private String description;
-        private List<String> tags;
-        private String sourceLink;
-        private CurrencyType currencyType;
-
-        private Builder() {
-        }
-
-        public Builder id(Integer val) {
-            id = val;
-            return this;
-        }
-
-        public Builder title(String val) {
-            title = val;
-            return this;
-        }
-
-        public Builder imageLink(String val) {
-            imageLink = val;
-            return this;
-        }
-
-        public Builder dateTime(LocalDateTime val) {
-            dateTime = val;
-            return this;
-        }
-
-        public Builder coordinates(String val) {
-            coordinates = val;
-            return this;
-        }
-
-        public Builder city(String val) {
-            city = val;
-            return this;
-        }
-
-        public Builder cost(Integer val) {
-            cost = val;
-            return this;
-        }
-
-        public Builder costCommentary(String val) {
-            costCommentary = val;
-            return this;
-        }
-
-        public Builder description(String val) {
-            description = val;
-            return this;
-        }
-
-        public Builder tags(List<String> val) {
-            tags = val;
-            return this;
-        }
-
-        public Builder sourceLink(String val) {
-            sourceLink = val;
-            return this;
-        }
-
-        public Builder currencyType(CurrencyType val) {
-            currencyType = val;
-            return this;
-        }
-
-        public Event build() {
-            return new Event(this);
-        }
-    }
-
 }
