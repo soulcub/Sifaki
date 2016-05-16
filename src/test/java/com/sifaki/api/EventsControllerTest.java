@@ -1,5 +1,6 @@
 package com.sifaki.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +34,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static com.sifaki.Errors.EVENT_ALREADY_EXIST;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -115,7 +121,7 @@ public class EventsControllerTest {
 
     @After
     public void tearDown() {
-        verify(transaction).commit();
+        verify(transaction, atLeast(1)).commit();
         verify(session).close();
     }
 
@@ -181,6 +187,8 @@ public class EventsControllerTest {
                 .withCurrencyType(CurrencyType.UAH)
                 .withCategory(3)
                 .build();
+        doReturn(query).when(session).createQuery("from " + Event.class.getName() + " E where E.sourceLink = '" + eventWithoutId.getSourceLink() + "'");
+        doReturn(new ArrayList<>()).when(query).list();
         doReturn(event).when(session).save(eventWithoutId);
 
         mvc.perform(
@@ -193,6 +201,25 @@ public class EventsControllerTest {
         ).andExpect(
                 content().string(equalTo(eventJson))
         );
+        verify(transaction, times(2)).commit();
+    }
+
+    @Test
+    public void testCreateEventWhichAlreadyExists() throws Exception {
+        doReturn(query).when(session).createQuery("from " + Event.class.getName() + " E where E.sourceLink = '" + event.getSourceLink() + "'");
+        doReturn(Collections.singletonList(event)).when(query).list();
+
+        mvc.perform(
+                MockMvcRequestBuilders
+                        .post("/events/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(eventJson)
+        ).andExpect(
+                status().isOk()
+        ).andExpect(
+                content().string(equalTo("{\"errorName\":\"EVENT_ALREADY_EXIST\",\"errorCode\":" + EVENT_ALREADY_EXIST.getErrorCode() + "}"))
+        );
+        verify(session, never()).save(anyObject());
     }
 
     @Test

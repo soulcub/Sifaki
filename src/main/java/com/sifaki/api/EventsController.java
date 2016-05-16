@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sifaki.Errors;
 import com.sifaki.db.entity.Event;
 import com.sifaki.db.entity.EventCategory;
 import org.hibernate.Session;
@@ -32,7 +33,7 @@ public class EventsController {
 
     @RequestMapping(value = "/getById/{id}", method = RequestMethod.GET)
     public String getById(@PathVariable int id) throws JsonProcessingException {
-        try(Session session = sessionFactory.openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             LOGGER.info("Getting Event by id='{}'", id);
             final Transaction transaction = session.beginTransaction();
             final List list = session.createQuery("from " + Event.class.getName() + " E where E.id = " + id).list();
@@ -55,7 +56,7 @@ public class EventsController {
 
     @RequestMapping(value = "/getByCategory/{category}", method = RequestMethod.GET)
     public String getByCategory(@PathVariable int category) throws JsonProcessingException {
-        try(Session session = sessionFactory.openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             LOGGER.info("Getting Event by category='{}'", category);
             final Transaction transaction = session.beginTransaction();
             final List list = session.createQuery("from " + Event.class.getName() + " E where E.category = " + category).list();
@@ -92,13 +93,20 @@ public class EventsController {
 
     @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String createEvent(@RequestBody Event event) throws JsonProcessingException {
-        final Session session = sessionFactory.openSession();
-        final Transaction transaction = session.beginTransaction();
-        final Serializable save = session.save(event);
-        transaction.commit();
-        session.close();
-
-        return new ObjectMapper().writeValueAsString(save);
+        try (final Session session = sessionFactory.openSession()) {
+            final Transaction transaction = session.beginTransaction();
+            final List list = session.createQuery("from " + Event.class.getName() + " E where E.sourceLink = '" + event.getSourceLink() + "'").list();
+            transaction.commit();
+            if (!list.isEmpty()) {
+                return new ObjectMapper().writeValueAsString(Errors.EVENT_ALREADY_EXIST);
+            }
+            final Serializable save = session.save(event);
+            transaction.commit();
+            return new ObjectMapper().writeValueAsString(save);
+        } catch (Exception e) {
+            LOGGER.error("Some unexpected error occurred", e);
+            return new ObjectMapper().writeValueAsString(Errors.UNDEFINED_ERROR);
+        }
     }
 
     @RequestMapping(value = "/categories/get", method = RequestMethod.GET)
