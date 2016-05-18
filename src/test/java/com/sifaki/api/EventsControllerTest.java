@@ -122,7 +122,7 @@ public class EventsControllerTest {
     @After
     public void tearDown() {
         verify(transaction, atLeast(1)).commit();
-        verify(session).close();
+        verify(session, atLeast(1)).close();
     }
 
     @Test
@@ -202,6 +202,7 @@ public class EventsControllerTest {
                 content().string(equalTo(eventJson))
         );
         verify(transaction, times(2)).commit();
+        verify(session, times(2)).close();
     }
 
     @Test

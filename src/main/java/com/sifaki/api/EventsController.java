@@ -100,6 +100,13 @@ public class EventsController {
             if (!list.isEmpty()) {
                 return new ObjectMapper().writeValueAsString(Errors.EVENT_ALREADY_EXIST);
             }
+        } catch (Exception e) {
+            LOGGER.error("Some unexpected error occurred", e);
+            return new ObjectMapper().writeValueAsString(Errors.UNDEFINED_ERROR);
+        }
+
+        try (final Session session = sessionFactory.openSession()) {
+            final Transaction transaction = session.beginTransaction();
             final Serializable save = session.save(event);
             transaction.commit();
             return new ObjectMapper().writeValueAsString(save);
